@@ -1,3 +1,2 @@
-from pprint import pprint
-grid = ['⬛️' * 50] * 50
-pprint(grid)
+from car import Car
+from map import Map
