@@ -20,8 +20,10 @@ async def main():
             [0.25, 0.15, 0.5, 0.1]  #D
         ]
   car_map[0] = Car(15, 10, graph)
+  car_map[1] = Car(15, 11, graph)
 
-  asyncio.create_task(car_map[0].vroom())
+  for i in car_map:
+    asyncio.create_task(car_map[i].vroom())
   asyncio.create_task(map.render_map())
 
 

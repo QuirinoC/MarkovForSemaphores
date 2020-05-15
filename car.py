@@ -40,20 +40,19 @@ class Car:
       'left' : (-1,0),
       'right' : (1 ,0),
     }
-    self.decide()
+    self.dir = self.decide()
     x, y = dir_map[self.dir]
     self.x += x
     self.y += y
 
   def decide(self):
-    self.f.writelines("Street: " + self.street + "\n")
     graphRow = self.graph[self.street]
     accum = 0
     limit = random()
     for i, p in enumerate(graphRow):
       accum += p
       if limit < accum:
-        self.dir = dir_options[i]
+        return dir_options[i]
 
   async def vroom(self):
     while self.run:
