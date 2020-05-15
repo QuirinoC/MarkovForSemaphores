@@ -2,9 +2,9 @@ from random import choice
 import asyncio
 from random import random, randint
 
-car_colors = ['🚖', '🚗', '🚘', '🚙', '🚍']
+car_colors = ['🚖', '🚗', '🚘', '🚙', '🚍'] 
 dir_options = ['up', 'down', 'left', 'right']
-street_options = [0, 1, 2, 3] # A, B, C, D
+street_options = list(range(12))
 
 class Car:
   def __init__(self,
@@ -23,7 +23,7 @@ class Car:
     self.speed  = randint(1,5) if speed is None else speed
     self.color  = choice(car_colors) if color is None else car_colors[color]
     self.dir    = choice(dir_options) if dir is None else dir
-    self.street = choice(street_options) if street is None else street
+    self.street = choice(street_options) if street is None else street # The state in the MM
     self.run    = True
     self.f = open("log.txt", "w")
 
@@ -40,19 +40,9 @@ class Car:
       'left' : (-1,0),
       'right' : (1 ,0),
     }
-    self.dir = self.decide()
     x, y = dir_map[self.dir]
     self.x += x
     self.y += y
-
-  def decide(self):
-    graphRow = self.graph[self.street]
-    accum = 0
-    limit = random()
-    for i, p in enumerate(graphRow):
-      accum += p
-      if limit < accum:
-        return dir_options[i]
 
   async def vroom(self):
     while self.run:

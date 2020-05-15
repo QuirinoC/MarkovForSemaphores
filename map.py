@@ -2,22 +2,32 @@ from os import system, name
 import asyncio
 from car import Car, car_colors
 
+letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
 cls_cmd = 'clear' if name == 'posix' else 'cls'
 def clear():
   system(cls_cmd)
 
 class Map():
   def __init__(self, path: str, cars: dict = {}):
-    self.grid = self.parse_map(path)
+    self.grid, self.symbol_table = self.parse_map(path)
     # Keep track of the cars
     self.cars = cars
-
   def parse_map(self,path):
     with open(path) as map_file:
       text = map_file.read()
       lines = text.split('\n')
+
     grid = [list(row) for row in lines]
-    return grid
+
+    symbol_table = {}
+    # Parse spawn points
+    for i, row in enumerate(grid):
+      for j, col in enumerate(row):
+        if col in letters:
+          symbol_table[(i,j)] = 'A'
+
+    return grid, symbol_table
 
   def grid_to_str(self, grid):
     res = ''
@@ -33,6 +43,14 @@ class Map():
 
   def __str__(self):
     return self.grid_to_str(self.grid)
+
+  async def spawn_cars(self):
+    c = 0
+    while True:
+      self.cars[i] = Car()
+      asyncio.create_task()
+      i+=1
+    pass
 
   async def render_map(self):
     '''
