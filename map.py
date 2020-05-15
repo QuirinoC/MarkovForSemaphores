@@ -48,33 +48,31 @@ class Map():
 
         return res
 
-    async def spawn_cars(self):
-        c = 0
-        while True:
-            self.cars[i] = Car()
-            asyncio.create_task()
-            c += 1
-        pass
-
     async def run(self):
-        pass
+        # Main loop
+        while True:
+            # Force loop to run at least every 200ms
+            timer_task = asyncio.create_task(asyncio.sleep(0.200))
+            render_task = asyncio.create_task(self.render_map())
+
+            await render_task
+            await timer_task
 
     async def render_map(self):
         '''
           This might be non-efficient, pls fix razonixx
         '''
-        while True:
-            # Make a tmp map for each time we render
-            grid = [row[::] for row in self.grid]
+        # Make a tmp map for each time we render
+        grid = [row[::] for row in self.grid]
 
-            # Put each car in its x,y coords
-            for idx, car in self.cars.items():
-                x, y = car.x, car.y
-                grid[x][y] = car.color
-                print(x, y, car.color)
+        # Put each car in its x,y coords
+        for idx, car in self.cars.items():
+            x, y = car.x, car.y
+            grid[x][y] = car.color
+            print(x, y, car.color)
 
-            clear()
-            print(
-                self.grid_to_str(grid)
-            )
-            await asyncio.sleep(0.5)
+        clear()
+        print(
+            self.grid_to_str(grid)
+        )
+        await asyncio.sleep(0.5)
