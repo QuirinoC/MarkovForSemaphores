@@ -2,51 +2,51 @@ from random import choice
 import asyncio
 from random import random, randint
 
-car_colors = ['🚖', '🚗', '🚘', '🚙', '🚍'] 
+car_colors = ['🚖', '🚗', '🚘', '🚙', '🚍']
 dir_options = ['up', 'down', 'left', 'right']
 street_options = list(range(12))
 
+
 class Car:
-  def __init__(self,
-               x,
-               y,
-               graph,
-               speed=1,
-               color=None,
-               dir=None,
-               street=None,
-              ):
+    def __init__(self,
+                 x,
+                 y,
+                 graph,
+                 speed=1,
+                 color=None,
+                 dir=None,
+                 street=None,
+                 ):
 
-    self.x      = x
-    self.y      = y
-    self.graph  = graph
-    self.speed  = randint(1,5) if speed is None else speed
-    self.color  = choice(car_colors) if color is None else car_colors[color]
-    self.dir    = choice(dir_options) if dir is None else dir
-    self.street = choice(street_options) if street is None else street # The state in the MM
-    self.run    = True
-    self.f = open("log.txt", "w")
+        self.x = x
+        self.y = y
+        self.graph = graph
+        self.speed = randint(1, 5) if speed is None else speed
+        self.color = choice(car_colors) if color is None else car_colors[color]
+        self.dir = choice(dir_options) if dir is None else dir
+        # The state in the MM
+        self.street = choice(street_options) if street is None else street
+        self.run = True
+        self.f = open("log.txt", "w")
 
-  def __str__(self):
-    return self.color
+    def __str__(self):
+        return self.color
 
-  def __repr__(self):
-    return f'{self.color} ({self.x},{self.y})'
+    def __repr__(self):
+        return f'{self.color} ({self.x},{self.y})'
 
-  def move(self):
-    dir_map = {
-      'up'   : (0 ,1),
-      'down' : (0,-1),
-      'left' : (-1,0),
-      'right' : (1 ,0),
-    }
-    x, y = dir_map[self.dir]
-    self.x += x
-    self.y += y
+    def move(self):
+        dir_map = {
+            'up': (0, 1),
+            'down': (0, -1),
+            'left': (-1, 0),
+            'right': (1, 0),
+        }
+        x, y = dir_map[self.dir]
+        self.x += x
+        self.y += y
 
-  async def vroom(self):
-    while self.run:
-      self.move()
-      await asyncio.sleep(1)
-
-    
+    async def vroom(self):
+        while self.run:
+            self.move()
+            await asyncio.sleep(1)

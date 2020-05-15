@@ -1,17 +1,19 @@
 from random import random
+
+
 class Graph:
     def __init__(self, path='graph.txt'):
         self.graph = self.parse_graph(path)
-        
-    
+
     def parse_graph(self, path):
-        with open(path,'r') as f:
+        with open(path, 'r') as f:
             lines = f.readlines()
 
         graph_data = [[float(val) for val in row.split(',')] for row in lines]
 
         for idx, row in enumerate(graph_data):
-            assert round(sum(row), 4)== 1, f'Non markovian graph detected | {idx} | {row} | {sum(row)}'
+            assert round(
+                sum(row), 4) == 1, f'Non markovian graph detected | {idx} | {row} | {sum(row)}'
 
         return graph_data
 
@@ -24,6 +26,7 @@ class Graph:
             if limit < accum:
                 return idx
                 break
+
 
 '''
         # A    B    C    D    E    F    G    H    I    J    K    L

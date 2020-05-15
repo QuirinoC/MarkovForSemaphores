@@ -6,20 +6,21 @@ import asyncio
 
 # Markov graph path
 GRAPH_PATH = 'graph.txt'
-MAP_PATH   = 'mapa_symbols.txt'
+MAP_PATH = 'mapa_symbols.txt'
 
 
 async def block():
-  # Block for ever
-  while True:
-    await asyncio.sleep(0xFFFFFFFFFFFF)
+    # Block for ever
+    while True:
+        await asyncio.sleep(0xFFFFFFFFFFFF)
+
 
 async def main():
-  zapopan_graph = Graph(GRAPH_PATH)
-  zapopan_map   = Map(MAP_PATH)
+    zapopan_graph = Graph(GRAPH_PATH)
+    zapopan_map = Map(MAP_PATH)
 
-  await zapopan_map.render_map()
+    await zapopan_map.run()
 
 
 if __name__ == "__main__":
-  asyncio.run(main())
+    asyncio.run(main())
