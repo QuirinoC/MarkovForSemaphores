@@ -7,17 +7,21 @@ letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 cls_cmd = 'clear' if name == 'posix' else 'cls'
 
+street_light_dict = {
+    (10,21):{'x':10, 'y':21, 'green_length':7, 'red_length':100, 'color':'red'},
+}
 
 def clear():
     system(cls_cmd)
 
 
 class Map():
-    def __init__(self, path: str, graph: [[str]], cars: dict = {}):
+    def __init__(self, path: str, graph: [[str]], locks: [[asyncio.Lock]], cars: dict = {}):
         self.grid = self.parse_map(path)
         self.graph = graph
         # Keep track of the cars
         self.cars = cars
+        self.locks = locks
 
     def __str__(self):
         return self.grid_to_str(self.grid)
@@ -51,14 +55,42 @@ class Map():
         while True:
             # Get next spawn point 
             x,y = choice(self.graph.metadata['spawns'])
-            car = Car(x,y, self.grid, self.graph)
+            car = Car(x,y, self.grid, self.graph, self.locks)
             self.cars[n_cars] = car; n_cars+=1
             asyncio.create_task(car.drive())
             await asyncio.sleep(0.1)
+    
+    async def street_light(self, grid, street_light_id):
+        s = street_light_dict[street_light_id]
+        while True:
+            s['color'] = 'red'
+            grid[s['x']][s['y']] = 'S'
+            self.locks[s['x']][s['y']].aquire()
+            await asyncio.sleep(s['red_length'])
+            s['color'] = 'green'
+            grid[s['x']][s['y']] = '+'
+            self.locks[s['x']][s['y']].release()
+            await asyncio.sleep(s['green_length'])
+
+        '''
+        l = asyncio.Lock()
+
+        await l.acquire()
+        try:
+            s['color'] = 'red'
+            grid[s['x']][s['y']] = 'S'
+            timer_task = asyncio.create_task(asyncio.sleep(s['loop_length']))
+            await timer_task
+        finally:
+            s['color'] = 'green'
+            grid[s['x']][s['y']] = '+'
+            l.release()
+        '''
 
     async def run(self):
         # Main loop
         spawn_task = asyncio.create_task(self.spawn_cars())
+        asyncio.create_task(self.street_light(self.grid, (10,21)))
         while True:
             # Force loop to run at least every n seconds
             timer_task = asyncio.create_task(asyncio.sleep(2))

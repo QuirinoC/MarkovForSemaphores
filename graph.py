@@ -57,7 +57,6 @@ class Graph:
             accum += p
             if limit < accum:
                 return idx
-                break
 
 
 '''

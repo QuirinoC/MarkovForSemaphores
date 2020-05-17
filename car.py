@@ -14,6 +14,7 @@ class Car:
                  j,
                  map,
                  graph,
+                 locks,
                  speed=1,
                  color=None,
                  street=None,
@@ -23,6 +24,7 @@ class Car:
         self.j      = j
         self.map    = map
         self.graph  = graph
+        self.locks  = locks
         self.speed  = randint(1, 5) if speed is None else speed
         self.color  = choice(car_colors) if color is None else car_colors[color]
         # The state in the MM
