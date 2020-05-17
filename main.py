@@ -17,7 +17,7 @@ async def block():
 
 async def main():
     zapopan_graph = Graph(GRAPH_PATH)
-    zapopan_map = Map(MAP_PATH)
+    zapopan_map = Map(MAP_PATH, zapopan_graph)
 
     await zapopan_map.run()
 
