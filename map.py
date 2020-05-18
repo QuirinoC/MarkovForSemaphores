@@ -2,26 +2,41 @@ from os import system, name
 import asyncio
 from car import Car, car_colors
 from random import choice
+from semaphore import SemaphoreSet
 
 letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 cls_cmd = 'clear' if name == 'posix' else 'cls'
 
 street_light_dict = {
-    (10,21):{'x':10, 'y':21, 'green_length':7, 'red_length':100, 'color':'red'},
+    (10,21):{'x':10, 'y':21, 'green_length':5, 'red_length':5, 'color':'red'},
+    (10,22):{'x':10, 'y':22, 'green_length':5, 'red_length':5, 'color':'red'},
+    (10,23):{'x':10, 'y':23, 'green_length':5, 'red_length':5, 'color':'red'},
 }
 
 def clear():
     system(cls_cmd)
 
-
 class Map():
-    def __init__(self, path: str, graph: [[str]], locks: [[asyncio.Lock]], cars: dict = {}):
+    def __init__(self, path: str, graph: [[str]], cars: dict = {}):
         self.grid = self.parse_map(path)
         self.graph = graph
         # Keep track of the cars
         self.cars = cars
-        self.locks = locks
+        self.locks = [[asyncio.Lock() for j in range(len(self.grid[0]))] for i in range(len(self.grid))]
+        self.semaphores = self.load_semaphores()
+    
+    def load_semaphores(self):
+        semaphores = []
+        for idx, row in enumerate(self.grid):
+            for j, col in enumerate(row):
+                if col == 'S':
+                    semaphores.append(
+                        SemaphoreSet(
+                            self.grid, self.locks, idx, j, cycle_duration=3
+                        )
+                    )
+        return semaphores
 
     def __str__(self):
         return self.grid_to_str(self.grid)
@@ -47,55 +62,54 @@ class Map():
 
         return res
 
-    async def spawn_cars(self):
+    def locks_to_str(self):
+        res = ''
+        for idx, row in enumerate(self.locks):
+            for j, col in enumerate(row):
+                if col.locked():
+                    res += 'B '
+                else:
+                    res += f'U '
+            res += '\n'
+        return res
 
-        sem = asyncio.Semaphore(10)
+    async def spawn_cars(self):
 
         n_cars = 0
         while True:
             # Get next spawn point 
             x,y = choice(self.graph.metadata['spawns'])
-            car = Car(x,y, self.grid, self.graph, self.locks)
+            car = Car(x, y, self.grid, self.graph, self.locks, self.locks)
             self.cars[n_cars] = car; n_cars+=1
             asyncio.create_task(car.drive())
             await asyncio.sleep(0.1)
-    
-    async def street_light(self, grid, street_light_id):
-        s = street_light_dict[street_light_id]
-        while True:
-            s['color'] = 'red'
-            grid[s['x']][s['y']] = 'S'
-            self.locks[s['x']][s['y']].aquire()
-            await asyncio.sleep(s['red_length'])
-            s['color'] = 'green'
-            grid[s['x']][s['y']] = '+'
-            self.locks[s['x']][s['y']].release()
-            await asyncio.sleep(s['green_length'])
 
-        '''
-        l = asyncio.Lock()
-
-        await l.acquire()
-        try:
-            s['color'] = 'red'
-            grid[s['x']][s['y']] = 'S'
-            timer_task = asyncio.create_task(asyncio.sleep(s['loop_length']))
-            await timer_task
-        finally:
-            s['color'] = 'green'
-            grid[s['x']][s['y']] = '+'
-            l.release()
-        '''
+    async def start_semaphores(self):
+        tasks = []
+        for semaphore in self.semaphores:
+            tasks.append(
+                asyncio.gather(
+                    asyncio.create_task(semaphore.set_locks()),
+                    asyncio.create_task(semaphore.run())
+                )
+                
+            )
+        await asyncio.gather(*tasks)
 
     async def run(self):
         # Main loop
         spawn_task = asyncio.create_task(self.spawn_cars())
-        asyncio.create_task(self.street_light(self.grid, (10,21)))
+        semaphores_task = asyncio.create_task(self.start_semaphores())
         while True:
+            if spawn_task.done():
+                print('I dont know why but every car exploded')
+                break
+            if semaphores_task.done():
+                print('I dont know why but every semaphore exploded')
+                break
             # Force loop to run at least every n seconds
-            timer_task = asyncio.create_task(asyncio.sleep(2))
-            render_task = asyncio.create_task(self.render_map())
-            await render_task
+            timer_task = asyncio.create_task(asyncio.sleep(1))
+            await self.render_map()
             await timer_task
 
     def validate_coord(self, i, j):
@@ -117,7 +131,8 @@ class Map():
             '>': '-',
             '<': '-',
             'v': '|',
-            '^': '|'
+            '^': '|',
+            'S': '🇲🇲',
         }
 
         # Replace special symbols
@@ -141,7 +156,9 @@ class Map():
             
             grid[i][j] = car.color
 
+        # Print values
         clear()
+        print(len(self.cars))
         print(
             self.grid_to_str(grid)
         )

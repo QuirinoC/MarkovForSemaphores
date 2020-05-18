@@ -30,8 +30,8 @@ class Car:
         # The state in the MM
         self.street = choice(street_options) if street is None else street
         self.run    = True
-        self.f      = open("log.txt", "w")
         self.lock   = asyncio.Lock()
+        self.prev_lock = None
 
     def __str__(self):
         return self.color
@@ -39,7 +39,12 @@ class Car:
     def __repr__(self):
         return f'{self.color} ({self.i},{self.j})'
 
-    def move(self, dir):
+    def move_to(self, i, j):
+        self.i = i
+        self.j = j
+        
+
+    def get_next(self, dir):
         dir_map = {
             'up':    (-1, 0),
             'down':  (1, 0),
@@ -47,8 +52,7 @@ class Car:
             'right': (0, 1),
         }
         i, j = dir_map[dir]
-        self.i += i
-        self.j += j
+        return (self.i + i), (self.j + j)
 
     async def drive(self):
 
@@ -63,8 +67,18 @@ class Car:
             # Get the symbol the car is at
             symbol = self.map[self.i][self.j]
             direction = symbol_mapper.get(symbol)
+
             if direction:
-                self.move(direction)
+                # Get next spot for car
+                i, j = self.get_next(direction)
+
+                # Avoid cars overlapping by using locks
+                await self.locks[i][j].acquire()
+                self.move_to(i,j)
+                if self.prev_lock: 
+                    self.prev_lock.release()
+                self.prev_lock = self.locks[i][j]
             else:
-                self.run = False
+                await self.locks[i][j].acquire()
+                self.run = True
             await asyncio.sleep(1)
