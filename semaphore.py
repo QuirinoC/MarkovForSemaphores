@@ -43,6 +43,7 @@ class SemaphoreSet:
     async def set_locks(self):
         for name, locks in self.semaphores.items():
             for i,j in locks:
+                self.grid[i][j] = 'B'
                 await self.locks[i][j].acquire()
 
     def print_locks(self):

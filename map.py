@@ -71,7 +71,7 @@ def clear():
 class Map:
     def __init__(self, path: str, graph: [[str]], cars: dict = {}):
         self.grid = self.parse_map(path)
-        self.intersection = self.load_intersections(self.grid)
+        self.intersection = self.load_intersections()
         self.graph = graph
         # Keep track of the cars
         self.cars = cars
@@ -79,22 +79,29 @@ class Map:
                       for i in range(len(self.grid))]
         self.semaphores = self.load_semaphores()
 
-    def load_intersections(self, grid):
-        data = {
-
-        }
-
-        for idx, row in enumerate(grid):
+    def load_intersections(self):
+        horizontal = 'AFEJOTSX'
+        vertical   = 'DKHMLQNU'
+        # Load intersection data and revert grid
+        data = {}
+        for idx, row in enumerate(self.grid):
             for j, col in enumerate(row):
-                if col in 'ABCDEFGHIJKL':
+                if col in 'ABCDEFGHIJKLMNOPQRSTUVWX':
                     data[col] = data.get(col, []) + [(idx,j)]
+                    if col in horizontal:
+                        self.grid[idx][j] = '-'
+                    elif col in vertical:
+                        self.grid[idx][j] = '|'
         return data
+        # Revert intersections
+
+
 
     def load_semaphores(self):
         semaphores = []
         for idx, row in enumerate(self.grid):
             for j, col in enumerate(row):
-                if col == 'S':
+                if col == 'Z':
                     semaphores.append(
                         SemaphoreSet(
                             self.grid, self.locks, idx, j, cycle_duration=3
@@ -124,7 +131,7 @@ class Map:
                     symbol_mapper = {
                         'U': '✅',
                         'B': '🔴',
-                        'S': '🌈'
+                        'Z': '🌈'
                     }
                     res += symbol_mapper.get(col, col+' ')
 
@@ -219,6 +226,8 @@ class Map:
             '<': '-',
             'v': '|',
             '^': '|',
+            'Y': 'X'
+
         }
 
         # Replace special symbols
