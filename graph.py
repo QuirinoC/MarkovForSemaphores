@@ -3,7 +3,13 @@ from random import random
 class Graph:
     def __init__(self, path='graph.txt'):
         self.graph = self.parse_graph(path)
+
     def parse_graph(self, path):
+        with open(path, 'r') as f:
+            data = eval(f.read())
+        return data
+
+    def parse_table(self, path):
         with open(path, 'r') as f:
             lines = f.readlines()
 
@@ -16,27 +22,10 @@ class Graph:
         return graph_data
 
     def decide(self, current_state):
-        row = self.graph[current_state]
+        node = self.graph[current_state]
         accum = 0
         limit = random()
-        for idx, p in enumerate(row):
+        for state, p in node.items():
             accum += p
             if limit < accum:
-                return idx
-
-
-'''
-        # A    B    C    D    E    F    G    H    I    J    K    L
-       [[.25, .25, .25, 0.0, 0.0, .25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], # A
-        [.25, .25, .25, 0.0, 0.0, .25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], # B
-        [.10, .10, .10, .10, .10, .25, .25, 0.0, 0.0, 0.0, 0.0, 0.0], # C
-        [0.0, 0.0, .25, .25, .25, 0.0, .25, 0.0, 0.0, 0.0, 0.0, 0.0], # D
-        [0.0, 0.0, .25, .25, .25, 0.0, .25, 0.0, 0.0, 0.0, 0.0, 0.0], # E
-        [.10, .10, .25, 0.0, 0.0, .10, 0.0, .10, .10, .25, 0.0, 0.0], # F
-        [0.0, 0.0, .25, .10, .10, 0.0, .10, 0.0, 0.0, .25, .10, .10], # G
-        [0.0, 0.0, 0.0, 0.0, 0.0, .25, 0.0, .25, .25, .25, 0.0, 0.0], # H
-        [0.0, 0.0, 0.0, 0.0, 0.0, .25, 0.0, .25, .25, .25, 0.0, 0.0], # I
-        [0.0, 0.0, 0.0, 0.0, 0.0, .25, .25, .10, .10, .10, .10, .10], # J
-        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, .25, 0.0, 0.0, .25, .25, .25], # K
-        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, .25, 0.0, 0.0, .25, .25, .25]] # L
-'''
+                return state

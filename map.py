@@ -11,56 +11,56 @@ cls_cmd = 'clear' if name == 'posix' else 'cls'
 
 SPAWNS = {
     # Spawns from the left side
-    0: {
-        0: (13, 0),  # U Turn
-        1: (13, 0),  # Left turn
-        2: (14, 0),  # Go straight
-        5: (15, 0),  # Right turn
+    'B': {
+        'A': (13, 0),  # U Turn
+        'D': (13, 0),  # Left turn
+        'F': (14, 0),  # Go straight
+        'K': (15, 0),  # Right turn
     },
-    7: {
-        7: (29, 0),  # U Turn
-        5: (29, 0),  # Left turn
-        9: (30, 0),  # Go straight
-        8: (31, 0),  # Right turn
+    'P': {
+        'O': (29, 0),  # U Turn
+        'L': (29, 0),  # Left turn
+        'T': (30, 0),  # Go straight
+        'Q': (31, 0),  # Right turn
     },
     # Spawns from top
-    1: {
-        1: (0, 23),  # U Turn
-        2: (0, 23),  # Left turn
-        5: (0, 22),  # Go straight
-        0: (0, 21),  # Right turn
+    'C': {
+        'D': (0, 23),  # U Turn
+        'F': (0, 23),  # Left turn
+        'K': (0, 22),  # Go straight
+        'A': (0, 21),  # Right turn
     },
-    3: {
-        1: (0, 61),  # U Turn
-        2: (0, 61),  # Left turn
-        5: (0, 60),  # Go straight
-        0: (0, 59),  # Right turn
+    'G': {
+        'H': (0, 61),  # U Turn
+        'J': (0, 61),  # Left turn
+        'M': (0, 60),  # Go straight
+        'E': (0, 59),  # Right turn
     },
     # Spawns from the right
-    4: {
-        4: (12, 85),  # U Turn
-        6: (12, 85),  # Left turn
-        2: (11, 85),  # Go straight
-        3: (10, 85),  # Right turn
+    'I': {
+        'J': (12, 85),  # U Turn
+        'H': (12, 85),  # Left turn
+        'E': (11, 85),  # Go straight
+        'M': (10, 85),  # Right turn
     },
-    11: {
-        11: (28, 85),  # U Turn
-        10: (28, 85),  # Left turn
-        9: (27, 85),  # Go straight
-        6: (26, 85),  # Right turn
+    'W': {
+        'X': (28, 85),  # U Turn
+        'U': (28, 85),  # Left turn
+        'S': (27, 85),  # Go straight
+        'N': (26, 85),  # Right turn
     },
     # Spawns from the bottom
-    8: {
-        8: (41, 24),  # U Turn
-        7: (41, 24),  # Left turn
-        5: (41, 25),  # Go straight
-        9: (41, 26),  # Right turn
+    'R': {
+        'Q': (41, 24),  # U Turn
+        'O': (41, 24),  # Left turn
+        'L': (41, 25),  # Go straight
+        'T': (41, 26),  # Right turn
     },
-    10: {
-        10: (41, 62),  # U Turn
-        9: (41, 62),  # Left turn
-        6: (41, 63),  # Go straight
-        11: (41, 64),  # Right turn
+    'V': {
+        'U': (41, 62),  # U Turn
+        'S': (41, 62),  # Left turn
+        'N': (41, 63),  # Go straight
+        'X': (41, 64),  # Right turn
     },
 }
 
@@ -68,16 +68,27 @@ SPAWNS = {
 def clear():
     system(cls_cmd)
 
-
-class Map():
+class Map:
     def __init__(self, path: str, graph: [[str]], cars: dict = {}):
         self.grid = self.parse_map(path)
+        self.intersection = self.load_intersections(self.grid)
         self.graph = graph
         # Keep track of the cars
         self.cars = cars
         self.locks = [[asyncio.Lock() for j in range(len(self.grid[0]))]
                       for i in range(len(self.grid))]
         self.semaphores = self.load_semaphores()
+
+    def load_intersections(self, grid):
+        data = {
+
+        }
+
+        for idx, row in enumerate(grid):
+            for j, col in enumerate(row):
+                if col in 'ABCDEFGHIJKL':
+                    data[col] = data.get(col, []) + [(idx,j)]
+        return data
 
     def load_semaphores(self):
         semaphores = []
@@ -159,7 +170,7 @@ class Map():
             self.cars[n_cars] = car
             n_cars += 1
             asyncio.create_task(car.drive())
-            await asyncio.sleep(5)
+            await asyncio.sleep(60)
 
     async def start_semaphores(self):
         tasks = []
@@ -241,4 +252,5 @@ class Map():
         print(
             self.grid_to_str(grid)
         )
+        print(self.intersection)
         pprint(self.cars)

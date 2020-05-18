@@ -96,5 +96,10 @@ class Car:
             if direction:
                 await self.move_next(direction)       
                 prev_direction = direction        
+            elif symbol == '+':
+                self.move = False
             else:
+                # Time to make a turn
+                self.street = self.next_street
+                self.next_street = self.graph.decide(self.street)
                 await self.move_next(prev_direction)
