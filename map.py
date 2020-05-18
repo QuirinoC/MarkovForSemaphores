@@ -57,7 +57,12 @@ class Map():
                 if col in car_colors:
                     res += col
                 else:
-                    res += f'{col} '
+                    symbol_mapper = {
+                        'U':'❇️ ',
+                        'B':'🔴'
+                    }
+                    res += symbol_mapper.get(col,col+' ')
+                    
             res += '\n'
 
         return res

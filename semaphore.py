@@ -52,11 +52,9 @@ class SemaphoreSet:
                 res += '❇️' if col.locked() else 'X'
                 res += ' '
             res += '\n'
-        print(res)
 
     async def acquire_semaphore(self, semaphore):
         i, j = semaphore
-        print(i,j)
         # Release the semaphores on unblocked
         self.locks[i][j].release()
         self.grid[i][j] = 'U'
@@ -66,7 +64,7 @@ class SemaphoreSet:
 
         # Block semaphores again
         await self.locks[i][j].acquire()
-        self.grid[i][j] = '+'
+        self.grid[i][j] = 'B'
 
 
     async def run(self):

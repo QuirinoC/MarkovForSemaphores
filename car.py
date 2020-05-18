@@ -3,7 +3,7 @@ import asyncio
 from random import random, randint
 from time import sleep
 
-car_colors = ['🚖', '🚘', '🚙', '🚍']
+car_colors = ['🚖', '🚘', '🚍']
 dir_options = ['up', 'down', 'left', 'right']
 street_options = list(range(12))
 
