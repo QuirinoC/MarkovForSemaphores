@@ -155,8 +155,10 @@ class Map():
             i, j = car.i, car.j
             
             # If Car is out grid kill it
-            if not self.validate_coord(i,j):
+            if not self.validate_coord(i,j) or not car.run:
                 car.run = False
+                if car.prev_lock.locked():
+                    car.prev_lock.release()
                 del self.cars[idx]
                 continue
             
@@ -164,7 +166,7 @@ class Map():
 
         # Print values
         clear()
-        #print(len(self.cars))
+        print(len(self.cars))
         #[print(self.cars[car].street) for car in self.cars]
         print(
             self.grid_to_str(grid)

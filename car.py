@@ -38,10 +38,25 @@ class Car:
     def __repr__(self):
         return f'{self.color} ({self.i},{self.j})'
 
-    def move_to(self, i, j):
+    def validate_coord(self, i, j):
+        return \
+                i >= 0 and\
+                i <  len(self.locks) and\
+                j >=0 and\
+                j <  len(self.locks[0])
+
+    async def move_next(self, direction):
+        # Get next spot for car
+        i, j = self.get_next(direction)
+
+        # Avoid cars overlapping by using locks
+        await self.locks[i][j].acquire()
         self.i = i
         self.j = j
-        
+        if self.prev_lock: 
+            self.prev_lock.release()
+        # Release prev_lock for next car
+        self.prev_lock = self.locks[i][j]
 
     def get_next(self, dir):
         dir_map = {
@@ -61,23 +76,14 @@ class Car:
                 '<' : 'left',
                 '>' : 'right'
         }
-
+        prev_direction = None
         while self.run:
             # Get the symbol the car is at
             symbol = self.map[self.i][self.j]
             direction = symbol_mapper.get(symbol)
-
             if direction:
-                # Get next spot for car
-                i, j = self.get_next(direction)
-
-                # Avoid cars overlapping by using locks
-                await self.locks[i][j].acquire()
-                self.move_to(i,j)
-                if self.prev_lock: 
-                    self.prev_lock.release()
-                self.prev_lock = self.locks[i][j]
+                await self.move_next(direction)       
+                prev_direction = direction        
             else:
-                await self.locks[i][j].acquire()
-                self.run = True
-            await asyncio.sleep(1)
+                await self.move_next(prev_direction)
+            await asyncio.sleep(.1)
