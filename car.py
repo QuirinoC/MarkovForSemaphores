@@ -89,6 +89,7 @@ class Car:
         }
         prev_direction = None
         while self.run:
+            await asyncio.sleep(0.5)
             # Get the symbol the car is at
             symbol = self.map[self.i][self.j]
             direction = symbol_mapper.get(symbol)
@@ -97,4 +98,3 @@ class Car:
                 prev_direction = direction        
             else:
                 await self.move_next(prev_direction)
-            await asyncio.sleep(0.5)
