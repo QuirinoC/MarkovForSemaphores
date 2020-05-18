@@ -14,9 +14,11 @@ class Car:
                  map,
                  graph,
                  locks,
+                 street,
+                 next_street,
                  speed=1,
                  color=None,
-                 street=None,
+
                  ):
 
         self.i      = i
@@ -27,7 +29,8 @@ class Car:
         self.speed  = randint(1, 5) if speed is None else speed
         self.color  = choice(car_colors) if color is None else car_colors[color]
         # The state in the MM
-        self.street = choice(street_options) if street is None else street
+        self.street = street
+        self.next_street = next_street
         self.run    = True
         self.lock   = asyncio.Lock()
         self.prev_lock = None
@@ -36,7 +39,7 @@ class Car:
         return self.color
 
     def __repr__(self):
-        return f'{self.color} ({self.i},{self.j})'
+        return f'{self.color} ({self.i},{self.j} {self.street}->{self.next_street})'
 
     def validate_coord(self, i, j):
         return \
@@ -48,15 +51,23 @@ class Car:
     async def move_next(self, direction):
         # Get next spot for car
         i, j = self.get_next(direction)
-
-        # Avoid cars overlapping by using locks
-        await self.locks[i][j].acquire()
+        is_valid_pos = self.validate_coord(i,j)
+        # Avoid trying to lock a Lock out of bounds
+        if is_valid_pos:
+            await self.locks[i][j].acquire()
+        # Move the car anyways so the matrix can kill it
         self.i = i
         self.j = j
-        if self.prev_lock: 
+        if self.prev_lock and self.prev_lock.locked(): 
             self.prev_lock.release()
-        # Release prev_lock for next car
-        self.prev_lock = self.locks[i][j]
+            # Release prev_lock for next car
+        
+        if is_valid_pos:
+            self.prev_lock = self.locks[i][j]
+        
+        # End car loop if it is stopped
+        if not is_valid_pos:
+            self.run = False
 
     def get_next(self, dir):
         dir_map = {
@@ -86,4 +97,4 @@ class Car:
                 prev_direction = direction        
             else:
                 await self.move_next(prev_direction)
-            await asyncio.sleep(.1)
+            await asyncio.sleep(0.5)

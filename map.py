@@ -3,19 +3,71 @@ import asyncio
 from car import Car, car_colors
 from random import choice
 from semaphore import SemaphoreSet
+from pprint import pprint
 
 letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 cls_cmd = 'clear' if name == 'posix' else 'cls'
 
-street_light_dict = {
-    (10,21):{'x':10, 'y':21, 'green_length':5, 'red_length':5, 'color':'red'},
-    (10,22):{'x':10, 'y':22, 'green_length':5, 'red_length':5, 'color':'red'},
-    (10,23):{'x':10, 'y':23, 'green_length':5, 'red_length':5, 'color':'red'},
+SPAWNS = {
+    # Spawns from the left side
+    0: {
+        0: (13, 0),  # U Turn
+        1: (13, 0),  # Left turn
+        2: (14, 0),  # Go straight
+        5: (15, 0),  # Right turn
+    },
+    7: {
+        7: (29, 0),  # U Turn
+        5: (29, 0),  # Left turn
+        9: (30, 0),  # Go straight
+        8: (31, 0),  # Right turn
+    },
+    # Spawns from top
+    1: {
+        1: (0, 23),  # U Turn
+        2: (0, 23),  # Left turn
+        5: (0, 22),  # Go straight
+        0: (0, 21),  # Right turn
+    },
+    3: {
+        1: (0, 61),  # U Turn
+        2: (0, 61),  # Left turn
+        5: (0, 60),  # Go straight
+        0: (0, 59),  # Right turn
+    },
+    # Spawns from the right
+    4: {
+        4: (12, 85),  # U Turn
+        6: (12, 85),  # Left turn
+        2: (11, 85),  # Go straight
+        3: (10, 85),  # Right turn
+    },
+    11: {
+        11: (28, 85),  # U Turn
+        10: (28, 85),  # Left turn
+        9: (27, 85),  # Go straight
+        6: (26, 85),  # Right turn
+    },
+    # Spawns from the bottom
+    8: {
+        8: (41, 24),  # U Turn
+        7: (41, 24),  # Left turn
+        5: (41, 25),  # Go straight
+        9: (41, 26),  # Right turn
+    },
+    10: {
+        10: (41, 62),  # U Turn
+        9: (41, 62),  # Left turn
+        6: (41, 63),  # Go straight
+        11: (41, 64),  # Right turn
+    },
 }
+
 
 def clear():
     system(cls_cmd)
+
 
 class Map():
     def __init__(self, path: str, graph: [[str]], cars: dict = {}):
@@ -23,9 +75,10 @@ class Map():
         self.graph = graph
         # Keep track of the cars
         self.cars = cars
-        self.locks = [[asyncio.Lock() for j in range(len(self.grid[0]))] for i in range(len(self.grid))]
+        self.locks = [[asyncio.Lock() for j in range(len(self.grid[0]))]
+                      for i in range(len(self.grid))]
         self.semaphores = self.load_semaphores()
-    
+
     def load_semaphores(self):
         semaphores = []
         for idx, row in enumerate(self.grid):
@@ -58,11 +111,12 @@ class Map():
                     res += col
                 else:
                     symbol_mapper = {
-                        'U':'❇️ ',
-                        'B':'🔴'
+                        'U': '✅',
+                        'B': '🔴',
+                        'S': '🌈'
                     }
-                    res += symbol_mapper.get(col,col+' ')
-                    
+                    res += symbol_mapper.get(col, col+' ')
+
             res += '\n'
 
         return res
@@ -78,17 +132,34 @@ class Map():
             res += '\n'
         return res
 
+    def pick_random_key(self, d: dict):
+        return choice(
+            list(
+                d.keys()
+            )
+        )
+
     async def spawn_cars(self):
 
         n_cars = 0
         while True:
             # Get state / spawn point
-            state = choice(list(self.graph.metadata['spawns'].keys()))
-            x, y  = choice(self.graph.metadata['spawns'][state])
-            car = Car(x, y, self.grid, self.graph, self.locks, self.locks, street=state)
-            self.cars[n_cars] = car; n_cars+=1
+            state = self.pick_random_key(SPAWNS)
+            next_state = self.pick_random_key(SPAWNS[state])
+            x, y = SPAWNS[state][next_state]
+            car = Car(
+                    x,
+                    y,
+                    self.grid,
+                    self.graph,
+                    self.locks,
+                    state, 
+                    next_state
+                )
+            self.cars[n_cars] = car
+            n_cars += 1
             asyncio.create_task(car.drive())
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(5)
 
     async def start_semaphores(self):
         tasks = []
@@ -98,7 +169,7 @@ class Map():
                     asyncio.create_task(semaphore.set_locks()),
                     asyncio.create_task(semaphore.run())
                 )
-                
+
             )
         await asyncio.gather(*tasks)
 
@@ -114,17 +185,16 @@ class Map():
                 print('I dont know why but every semaphore exploded')
                 break
             # Force loop to run at least every n seconds
-            timer_task = asyncio.create_task(asyncio.sleep(1))
+            timer_task = asyncio.create_task(asyncio.sleep(0.5))
             await self.render_map()
             await timer_task
 
     def validate_coord(self, i, j):
         return \
-                i >= 0 and\
-                i <  len(self.grid) and\
-                j >=0 and\
-                j <  len(self.grid[0])
-        
+            i >= 0 and\
+            i < len(self.grid) and\
+            j >= 0 and\
+            j < len(self.grid[0])
 
     async def render_map(self):
         '''
@@ -138,7 +208,6 @@ class Map():
             '<': '-',
             'v': '|',
             '^': '|',
-            'S': '🇲🇲',
         }
 
         # Replace special symbols
@@ -153,21 +222,23 @@ class Map():
             car = self.cars[idx]
 
             i, j = car.i, car.j
-            
+
             # If Car is out grid kill it
-            if not self.validate_coord(i,j) or not car.run:
+            if not self.validate_coord(i, j) or not car.run:
                 car.run = False
                 if car.prev_lock.locked():
                     car.prev_lock.release()
                 del self.cars[idx]
                 continue
-            
+
             grid[i][j] = car.color
 
         # Print values
+
         clear()
-        print(len(self.cars))
         #[print(self.cars[car].street) for car in self.cars]
+        print(len(self.cars))
         print(
             self.grid_to_str(grid)
         )
+        pprint(self.cars)
