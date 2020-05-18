@@ -7,7 +7,6 @@ car_colors = ['🚖', '🚘', '🚍']
 dir_options = ['up', 'down', 'left', 'right']
 street_options = list(range(12))
 
-
 class Car:
     def __init__(self,
                  i,

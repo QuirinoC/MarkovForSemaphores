@@ -82,9 +82,10 @@ class Map():
 
         n_cars = 0
         while True:
-            # Get next spawn point 
-            x,y = choice(self.graph.metadata['spawns'])
-            car = Car(x, y, self.grid, self.graph, self.locks, self.locks)
+            # Get state / spawn point
+            state = choice(list(self.graph.metadata['spawns'].keys()))
+            x, y  = choice(self.graph.metadata['spawns'][state])
+            car = Car(x, y, self.grid, self.graph, self.locks, self.locks, street=state)
             self.cars[n_cars] = car; n_cars+=1
             asyncio.create_task(car.drive())
             await asyncio.sleep(0.1)
@@ -163,7 +164,9 @@ class Map():
 
         # Print values
         clear()
-        print(len(self.cars))
+        #print(len(self.cars))
+        #[print(self.cars[car].street) for car in self.cars]
         print(
             self.grid_to_str(grid)
         )
+        input()
