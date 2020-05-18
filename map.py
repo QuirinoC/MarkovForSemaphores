@@ -169,4 +169,3 @@ class Map():
         print(
             self.grid_to_str(grid)
         )
-        input()
