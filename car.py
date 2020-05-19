@@ -2,6 +2,7 @@ from random import choice
 import asyncio
 from random import random, randint
 from time import sleep
+import numpy as np
 
 car_colors = ['🚖', '🚘', '🚍']
 dir_options = ['up', 'down', 'left', 'right']
@@ -86,32 +87,30 @@ class Car:
         i, j = dir_map[dir]
         return (self.i + i), (self.j + j)
 
-    async def turn_i(self, target_i):
-        while self.i != target_i:
-            if self.i < target_i:
-                await self.move_to(self.i + 1, self.j)
-            else:
-                    await self.move_to(self.i - 1, self.j)
-            await asyncio.sleep(0.5)
-        
-    async def turn_j(self, target_j):
-         while self.j != target_j:
-            if self.j < target_j:
-                await self.move_to(self.i , self.j + 1)
-            else:
-                await self.move_to(self.i, self.j - 1)
-            await asyncio.sleep(0.5)
+    def distance(self, p1, p2):
+        x1, y1 = p1
+        x2, y2 = p2
+        return (
+            (x2 - x1) ** 2 +\
+            (y2 - y1) ** 2
+        ) ** 0.5
+
+    def get_points(self, p1, p2):
+        parts = self.distance(p1,p2)
+        points =  list(
+            zip(
+                [int(round(i)) for i in np.linspace(p1[0], p2[0], parts+parts)],
+                [int(round(j)) for j in np.linspace(p1[1], p2[1], parts+parts)]
+            )
+        )
+        seen = set()
+        seen_add = seen.add
+        return [x for x in points if not (x in seen or seen_add(x))]
 
     async def turn(self, target_i, target_j):
-        turn_i_t =  self.turn_i(target_i)
-        turn_j_t =  self.turn_j(target_j)
-
-        if self.prev_direction in 'v^':
-            await turn_i_t
-            await turn_j_t
-        else:
-            await turn_j_t
-            await turn_i_t
+        for i, j in self.get_points((self.i, self.j), (target_i, target_j))[1:]:
+            await self.move_to(i,j)
+            await asyncio.sleep(0.5)
 
     async def drive(self):
 

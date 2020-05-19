@@ -1,6 +1,6 @@
 import asyncio
 class SemaphoreSet:
-    def __init__(self, grid: [[str]], locks: [[asyncio.Lock()]], i: int, j: int, cycle_duration: int = 3):
+    def __init__(self, grid: [[str]], locks: [[asyncio.Lock()]], i: int, j: int, cycle_duration: int = 10, grace_period=3):
         top = [
             (i + 0, j + 3),
             (i + 0, j + 2),
@@ -27,6 +27,7 @@ class SemaphoreSet:
         self.grid = grid
         self.locks = locks
         self.cycle_duration = cycle_duration
+        self.grace_period = grace_period
         self.semaphores = {
             'top'   : top,
             'bottom': bottom,
@@ -42,7 +43,7 @@ class SemaphoreSet:
 
     async def set_locks(self):
         for name, locks in self.semaphores.items():
-            for i,j in locks[:-1]:
+            for i,j in locks:
                 self.grid[i][j] = 'B'
                 await self.locks[i][j].acquire()
 
@@ -67,6 +68,12 @@ class SemaphoreSet:
         await self.locks[i][j].acquire()
         self.grid[i][j] = 'B'
 
+    async def acquire_semaphores(self, semaphores):
+        tasks = []
+        for semaphore in semaphores:
+            tasks.append(self.acquire_semaphore(semaphore))
+
+        await asyncio.gather(*tasks)
 
     async def run(self):
         '''
@@ -75,41 +82,16 @@ class SemaphoreSet:
             - Then going straight and turning right
         '''
         while True:
-            # Left turns for vertical 
-            turn_left_top = asyncio.create_task(
-                self.acquire_semaphore(self.semaphores['top'][0])
-            )
-            turn_left_bottom = asyncio.create_task(
-                self.acquire_semaphore(self.semaphores['bottom'][0])
-            )
-            await asyncio.gather(turn_left_top, turn_left_bottom)
-
-            # Left turns for horizontal
-            turn_left_left = asyncio.create_task(
-                self.acquire_semaphore(self.semaphores['left'][0])
-            )
-            turn_left_right = asyncio.create_task(
-                self.acquire_semaphore(self.semaphores['right'][0])
-            )
-            await asyncio.gather(turn_left_left, turn_left_right)
-
-            # Vertical and right turns
-            horizontal_top = asyncio.create_task(
-                self.acquire_semaphore(self.semaphores['top'][1])
-            )
-            horizontal_bottom = asyncio.create_task(
-                self.acquire_semaphore(self.semaphores['bottom'][1])
-            )
-            await asyncio.gather(horizontal_top, horizontal_bottom)
-
-            # Horizontal and right turns
-            horizontal_left = asyncio.create_task(
-                self.acquire_semaphore(self.semaphores['left'][1])
-            )
-            horizontal_right = asyncio.create_task(
-                self.acquire_semaphore(self.semaphores['right'][1])
-            )
-            await asyncio.gather(horizontal_left, horizontal_top)
+            for key1, key2 in [('top', 'bottom'), ('left', 'right')]:
+                for x,y in [(0,1), (1, 3)]:
+                    t1 = asyncio.create_task(
+                        self.acquire_semaphores(self.semaphores[key1][x:y])
+                    )
+                    t2 = asyncio.create_task(
+                        self.acquire_semaphores(self.semaphores[key2][x:y])
+                    )
+                    await asyncio.gather(t1,t2)
+                    await asyncio.sleep(self.grace_period)
 
     async def render_locks(self):
         while True:

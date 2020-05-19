@@ -122,7 +122,7 @@ class Map:
                 if col == 'Z':
                     semaphores.append(
                         SemaphoreSet(
-                            self.grid, self.locks, idx, j, cycle_duration=3
+                            self.grid, self.locks, idx, j, cycle_duration=10, grace_period=4
                         )
                     )
         return semaphores
@@ -196,7 +196,7 @@ class Map:
             self.cars[n_cars] = car
             n_cars += 1
             asyncio.create_task(car.drive())
-            await asyncio.sleep(.1)
+            await asyncio.sleep(0.4)
 
     async def start_semaphores(self):
         tasks = []
@@ -280,4 +280,3 @@ class Map:
         print(
             self.grid_to_str(grid)
         )
-        print(self.cars)
