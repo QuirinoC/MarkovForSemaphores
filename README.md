@@ -8,7 +8,7 @@ This is s traffic simulation using markov models, where the states are the stree
 
 pip3 install numpy
 
-### Run
+### Run and watch your city run
 
 python3 main.py
 
