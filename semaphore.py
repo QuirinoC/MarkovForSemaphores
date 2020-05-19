@@ -82,9 +82,14 @@ class SemaphoreSet:
             - First the inner turns are made for each axis
             - Then going straight and turning right
         '''
+        side_order = [('top', 'bottom'), ('left', 'right')]
+        shuffle(side_order)
+        lights_order = [(0,1), (1, 3)]
+        shuffle(lights_order)
+
         while True:
-            for key1, key2 in [('top', 'bottom'), ('left', 'right')]:
-                for x,y in [(0,1), (1, 3)]:
+            for key1, key2 in side_order:
+                for x,y in lights_order:
                     t1 = asyncio.create_task(
                         self.acquire_semaphores(self.semaphores[key1][x:y])
                     )
