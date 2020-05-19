@@ -277,6 +277,9 @@ class Map:
         clear()
         #[print(self.cars[car].street) for car in self.cars]
         print(len(self.cars))
+        #print(
+        #    self.grid_to_str(grid)
+        #)
         print(
             self.grid_to_str(grid)
         )

@@ -1,4 +1,5 @@
 import asyncio
+from random import shuffle
 class SemaphoreSet:
     def __init__(self, grid: [[str]], locks: [[asyncio.Lock()]], i: int, j: int, cycle_duration: int = 10, grace_period=3):
         top = [

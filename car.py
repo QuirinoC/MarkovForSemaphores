@@ -77,6 +77,23 @@ class Car:
         if not is_valid_pos:
             self.run = False
 
+    def move_to_lockless(self, i, j):
+        '''
+            This is a workaround lmao
+        '''
+        # Move to a specific i,j coord
+        is_valid_pos = self.validate_coord(i, j)
+
+        # Move the car anyways so the matrix can kill it
+        self.i = i
+        self.j = j
+
+        # Leave the prev lock
+        if self.prev_lock and self.prev_lock.locked():
+            self.prev_lock.release()
+
+        
+
     def get_next(self, dir):
         dir_map = {
             'up':    (-1, 0),
@@ -109,7 +126,7 @@ class Car:
 
     async def turn(self, target_i, target_j):
         for i, j in self.get_points((self.i, self.j), (target_i, target_j))[1:]:
-            await self.move_to(i,j)
+            self.move_to_lockless(i,j)
             await asyncio.sleep(0.5)
 
     async def drive(self):
