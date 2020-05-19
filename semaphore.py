@@ -44,7 +44,7 @@ class SemaphoreSet:
 
     async def set_locks(self):
         for name, locks in self.semaphores.items():
-            for i,j in locks:
+            for i,j in locks[:-1]:
                 self.grid[i][j] = 'B'
                 await self.locks[i][j].acquire()
 
@@ -84,7 +84,7 @@ class SemaphoreSet:
         '''
         side_order = [('top', 'bottom'), ('left', 'right')]
         shuffle(side_order)
-        lights_order = [(0,1), (1, 3)]
+        lights_order = [(0,1), (1, 2)]
         shuffle(lights_order)
 
         while True:

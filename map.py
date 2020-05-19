@@ -122,7 +122,7 @@ class Map:
                 if col == 'Z':
                     semaphores.append(
                         SemaphoreSet(
-                            self.grid, self.locks, idx, j, cycle_duration=10, grace_period=4
+                            self.grid, self.locks, idx, j, cycle_duration=10, grace_period=3
                         )
                     )
         return semaphores
@@ -176,7 +176,7 @@ class Map:
         )
 
     async def spawn_cars(self):
-
+        cars_per_second = 2.5
         n_cars = 0
         while True:
             # Get state / spawn point
@@ -196,7 +196,7 @@ class Map:
             self.cars[n_cars] = car
             n_cars += 1
             asyncio.create_task(car.drive())
-            await asyncio.sleep(0.4)
+            await asyncio.sleep(1 / cars_per_second)
 
     async def start_semaphores(self):
         tasks = []
