@@ -42,7 +42,7 @@ class SemaphoreSet:
 
     async def set_locks(self):
         for name, locks in self.semaphores.items():
-            for i,j in locks:
+            for i,j in locks[:-1]:
                 self.grid[i][j] = 'B'
                 await self.locks[i][j].acquire()
 
@@ -74,13 +74,6 @@ class SemaphoreSet:
             - First the inner turns are made for each axis
             - Then going straight and turning right
         '''
-
-        # Right turn is always on
-        for key, indices in self.semaphores.items():
-            i, j = indices[-1]
-            self.locks[i][j].release()
-            self.grid[i][j] = 'U'
-
         while True:
             # Left turns for vertical 
             turn_left_top = asyncio.create_task(

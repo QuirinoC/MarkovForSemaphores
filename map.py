@@ -71,7 +71,7 @@ def clear():
 class Map:
     def __init__(self, path: str, graph: [[str]], cars: dict = {}):
         self.grid = self.parse_map(path)
-        self.intersection = self.load_intersections()
+        self.intersections = self.load_intersections()
         self.graph = graph
         # Keep track of the cars
         self.cars = cars
@@ -80,6 +80,27 @@ class Map:
         self.semaphores = self.load_semaphores()
 
     def load_intersections(self):
+        direction_mapper = {
+            # Horizontal
+            'A' : '<',
+            'F' : '>',
+            'E' : '<',
+            'J' : '>',
+            'O' : '<',
+            'T' : '>',
+            'S' : '<',
+            'X' : '>',
+            # Vertical
+            'D' : '^',
+            'K' : 'v',
+            'H' : '^',
+            'M' : 'v',
+            'L' : '^',
+            'Q' : 'v',
+            'N' : '^',
+            'U' : 'v',
+
+        }
         horizontal = 'AFEJOTSX'
         vertical   = 'DKHMLQNU'
         # Load intersection data and revert grid
@@ -88,10 +109,7 @@ class Map:
             for j, col in enumerate(row):
                 if col in 'ABCDEFGHIJKLMNOPQRSTUVWX':
                     data[col] = data.get(col, []) + [(idx,j)]
-                    if col in horizontal:
-                        self.grid[idx][j] = '-'
-                    elif col in vertical:
-                        self.grid[idx][j] = '|'
+                    self.grid[idx][j] = direction_mapper[col]
         return data
         # Revert intersections
 
@@ -172,12 +190,13 @@ class Map:
                     self.graph,
                     self.locks,
                     state, 
-                    next_state
+                    next_state,
+                    self.intersections
                 )
             self.cars[n_cars] = car
             n_cars += 1
             asyncio.create_task(car.drive())
-            await asyncio.sleep(60)
+            await asyncio.sleep(.1)
 
     async def start_semaphores(self):
         tasks = []
@@ -261,5 +280,4 @@ class Map:
         print(
             self.grid_to_str(grid)
         )
-        print(self.intersection)
-        pprint(self.cars)
+        print(self.cars)
