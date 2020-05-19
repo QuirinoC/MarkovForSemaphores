@@ -176,7 +176,7 @@ class Map:
         )
 
     async def spawn_cars(self):
-        cars_per_second = 2.5
+        cars_per_second = 3
         n_cars = 0
         while True:
             # Get state / spawn point
