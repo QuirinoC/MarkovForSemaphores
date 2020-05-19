@@ -11,3 +11,5 @@ pip3 install numpy
 ### Run
 
 python3 main.py
+
+![Example](images/example.png)
