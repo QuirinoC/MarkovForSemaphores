@@ -6,8 +6,8 @@ from semaphore import SemaphoreSet
 from pprint import pprint
 letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
-#from screen import Screen
-#SCREEN = Screen()
+from screen import Screen
+SCREEN = Screen()
 
 
 cls_cmd = 'clear' if name == 'posix' else 'cls'
@@ -158,7 +158,7 @@ class Map:
                     res += col
                 else:
                     symbol_mapper = {
-                        'U': '✅',
+                        'U': '❇️ ',
                         'B': '🔴',
                         'Z': '🌈'
                     }
@@ -235,7 +235,7 @@ class Map:
                 print('I dont know why but every semaphore exploded')
                 break
             # Force loop to run at least every n seconds
-            timer_task = asyncio.create_task(asyncio.sleep(0.01))
+            timer_task = asyncio.create_task(asyncio.sleep(0.035))
             await self.render_map()
             await timer_task
 
@@ -285,11 +285,9 @@ class Map:
 
             grid[i][j] = car.color
 
-        clear()
+        to_print = self.grid_to_str(grid)
         # Print values
-        print(
-            self.grid_to_str(grid)
-        )
-        print(f'Average wait time per car: {self.calculate_wait()}')
-        #await SCREEN.render(self.grid_to_str(grid))
+        #print(to_print)
+        #print(f'Average wait time per car: {self.calculate_wait()}', flush=True)
+        await SCREEN.render(to_print)
             
