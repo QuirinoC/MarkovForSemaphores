@@ -158,7 +158,7 @@ class Map:
                     res += col
                 else:
                     symbol_mapper = {
-                        'U': '❇️ ',
+                        'U': '❇️',
                         'B': '🔴',
                         'Z': '🌈'
                     }

@@ -8,10 +8,9 @@ class Screen:
         self.stdscr = curses.initscr()
 
     async def render(self, data):
-        self.stdscr.clear()
         for idx, row in enumerate(data.split('\n')):
             self.stdscr.addstr(idx,0, str(row))
-        self.stdscr.refresh()
+            self.stdscr.refresh()
 
 async def main():
     s = Screen([1,2,3,4])
