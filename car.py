@@ -121,8 +121,8 @@ class Car:
         parts = self.distance(p1,p2)
         points =  list(
             zip(
-                [int(round(i)) for i in np.linspace(p1[0], p2[0], parts+parts)],
-                [int(round(j)) for j in np.linspace(p1[1], p2[1], parts+parts)]
+                [int(round(i)) for i in np.linspace(p1[0], p2[0], int(parts))],
+                [int(round(j)) for j in np.linspace(p1[1], p2[1], int(parts))]
             )
         )
         seen = set()
