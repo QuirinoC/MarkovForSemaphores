@@ -6,9 +6,8 @@ from semaphore import SemaphoreSet
 from pprint import pprint
 letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
-if False:
-    from screen import Screen
-    SCREEN = Screen()
+#from screen import Screen
+#SCREEN = Screen()
 
 
 cls_cmd = 'clear' if name == 'posix' else 'cls'
@@ -286,13 +285,11 @@ class Map:
 
             grid[i][j] = car.color
 
+        clear()
         # Print values
-
-        if True:
-            print(
-                self.grid_to_str(grid)
-            )
-            print(f'Average wait time per car: {self.calculate_wait()}')
-        else:
-            await SCREEN.render(self.grid_to_str(grid))
+        print(
+            self.grid_to_str(grid)
+        )
+        print(f'Average wait time per car: {self.calculate_wait()}')
+        #await SCREEN.render(self.grid_to_str(grid))
             
