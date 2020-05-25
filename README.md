@@ -15,4 +15,4 @@ pip3 install numpy
 
 python3 main.py
 
-![](cars.gif)
+![](images/cars.gif)
