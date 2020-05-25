@@ -1,7 +1,7 @@
 import asyncio
 from random import shuffle
 class SemaphoreSet:
-    def __init__(self, grid: [[str]], locks: [[asyncio.Lock()]], i: int, j: int, cycle_duration: int = 10, grace_period=3):
+    def __init__(self, grid: [[str]], locks: [[asyncio.Lock()]], i: int, j: int, cycle_duration: int = 10, grace_period=3, speed_multiplier=1.0):
         top = [
             (i + 0, j + 3),
             (i + 0, j + 2),
@@ -35,6 +35,7 @@ class SemaphoreSet:
             'left'  : left,
             'right' : right,
         }
+        self.SPEED_MULTIPLIER = speed_multiplier
     
     def __str__(self):
         return str((self.i,self.j))
@@ -63,7 +64,7 @@ class SemaphoreSet:
         self.grid[i][j] = 'U'
 
         # Await required time
-        await asyncio.sleep(self.cycle_duration)
+        await asyncio.sleep(self.cycle_duration * self.SPEED_MULTIPLIER)
 
         # Block semaphores again
         await self.locks[i][j].acquire()
@@ -97,7 +98,7 @@ class SemaphoreSet:
                         self.acquire_semaphores(self.semaphores[key2][x:y])
                     )
                     await asyncio.gather(t1,t2)
-                    await asyncio.sleep(self.grace_period)
+                    await asyncio.sleep(self.grace_period * self.SPEED_MULTIPLIER)
 
     async def render_locks(self):
         while True:
