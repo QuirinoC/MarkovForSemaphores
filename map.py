@@ -72,7 +72,7 @@ def clear():
     system(cls_cmd)
 
 class Map:
-    def __init__(self, path: str, graph: [[str]], speed_multiplier=1.0, N_CARS = 10, cars: dict = {}, GUI=True):
+    def __init__(self, path: str, graph: [[str]], speed_multiplier=1.0, N_CARS = 10, cars: dict = {}, GUI=True, RIGHT_TURN=True, STATE=0):
         self.grid = self.parse_map(path)
         self.intersections = self.load_intersections()
         self.graph = graph
@@ -84,6 +84,8 @@ class Map:
                       for i in range(len(self.grid))]
         self.SPEED_MULTIPLIER = speed_multiplier
         self.N_CARS = N_CARS
+        self.RIGHT_TURN = True
+        self.STATE = STATE
         self.semaphores = self.load_semaphores()
         self.GUI = GUI
 
@@ -142,7 +144,7 @@ class Map:
                 if col == 'Z':
                     semaphores.append(
                         SemaphoreSet(
-                            self.grid, self.locks, idx, j, cycle_duration=10, grace_period=3, speed_multiplier=self.SPEED_MULTIPLIER
+                            self.grid, self.locks, idx, j, cycle_duration=10, grace_period=3, speed_multiplier=self.SPEED_MULTIPLIER, RIGHT_TURN=self.RIGHT_TURN, STATE=self.STATE
                         )
                     )
         return semaphores

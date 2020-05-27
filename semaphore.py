@@ -1,7 +1,7 @@
 import asyncio
 from random import shuffle
 class SemaphoreSet:
-    def __init__(self, grid: [[str]], locks: [[asyncio.Lock()]], i: int, j: int, cycle_duration: int = 10, grace_period=3, speed_multiplier=1.0):
+    def __init__(self, grid: [[str]], locks: [[asyncio.Lock()]], i: int, j: int, cycle_duration: int = 10, grace_period=5, speed_multiplier=1.0,RIGHT_TURN=True, STATE=0):
         top = [
             (i + 0, j + 3),
             (i + 0, j + 2),
@@ -36,6 +36,13 @@ class SemaphoreSet:
             'right' : right,
         }
         self.SPEED_MULTIPLIER = speed_multiplier
+        self.STATE = STATE
+
+        self.metadata = {
+            'right_turn' : RIGHT_TURN,
+        }
+
+
     
     def __str__(self):
         return str((self.i,self.j))
@@ -44,8 +51,11 @@ class SemaphoreSet:
         return self.__str__()
 
     async def set_locks(self):
+
+
         for name, locks in self.semaphores.items():
-            for i,j in locks[:-1]:
+            if self.metadata['right_turn']: locks = locks[:-1]
+            for i,j in locks[:]:
                 self.grid[i][j] = 'B'
                 await self.locks[i][j].acquire()
 
@@ -83,21 +93,37 @@ class SemaphoreSet:
             - First the inner turns are made for each axis
             - Then going straight and turning right
         '''
-        side_order = [('top', 'bottom'), ('left', 'right')]
+        R = 0 if self.metadata['right_turn'] else 1
+        STATES = {
+            0 : {
+                'side_order' :  [('top', 'bottom'), ('left', 'right')],
+                'lights_order' : [(0,1), (1,2 + R)]
+            },
+            1 : {
+                'side_order' : [['top'],['bottom'],['left'],['right'],],
+                'lights_order' : [(0,2), (2, 2 + R)]
+            }
+        }
+
+        STATE = STATES[0]
+
+        side_order = STATE['side_order']
+        lights_order = STATE['lights_order']
+
         shuffle(side_order)
-        lights_order = [(0,1), (1, 2)]
         shuffle(lights_order)
 
         while True:
-            for key1, key2 in side_order:
+            for k in side_order:
                 for x,y in lights_order:
-                    t1 = asyncio.create_task(
-                        self.acquire_semaphores(self.semaphores[key1][x:y])
-                    )
-                    t2 = asyncio.create_task(
-                        self.acquire_semaphores(self.semaphores[key2][x:y])
-                    )
-                    await asyncio.gather(t1,t2)
+                    tasks = []
+                    for k_ in k:
+                        tasks.append(
+                            asyncio.create_task(
+                            self.acquire_semaphores(self.semaphores[k_][x:y])
+                            )
+                        )
+                    await asyncio.gather(*tasks)
                     await asyncio.sleep(self.grace_period * self.SPEED_MULTIPLIER)
 
     async def render_locks(self):
