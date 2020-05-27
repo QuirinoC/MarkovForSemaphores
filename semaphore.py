@@ -85,7 +85,7 @@ class SemaphoreSet:
         '''
         side_order = [('top', 'bottom'), ('left', 'right')]
         shuffle(side_order)
-        lights_order = [(0,1), (1, 2)]
+        lights_order = [(0,2), (1, 2)]
         shuffle(lights_order)
 
         while True:

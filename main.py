@@ -16,8 +16,6 @@ GUI = args.gui
 SPEED = 1 / args.speed
 N_CARS = args.ncars
 
-print(GUI, SPEED, N_CARS);input()
-
 # Markov graph path
 GRAPH_PATH = 'graph.txt'
 MAP_PATH = 'mapa_symbols.txt'
