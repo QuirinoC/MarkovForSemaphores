@@ -295,10 +295,11 @@ class Map:
 
         to_print = self.grid_to_str(grid)
         # Print values
+        status = f'Average wait time per car: {self.calculate_wait()}'
         if self.GUI:
             #print(
             #    self.grid_to_str(grid)
             #)
-            print(f'Average wait time per car: {self.calculate_wait()}')
-        #await SCREEN.render(self.grid_to_str(grid))
+            #print(status)
+            await SCREEN.render(self.grid_to_str(grid), status)
             
