@@ -105,7 +105,7 @@ class SemaphoreSet:
             }
         }
 
-        STATE = STATES[0]
+        STATE = STATES[self.STATE]
 
         side_order = STATE['side_order']
         lights_order = STATE['lights_order']
