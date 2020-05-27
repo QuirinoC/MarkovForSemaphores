@@ -186,7 +186,6 @@ class Car:
             idx_mapper = [0,0,1,2]
             for idx, n_state in enumerate(mapper[street]):
                 if n_state == next_street:
-                    print(n_state, next_street)
                     turn_pos = turn_arr[idx_mapper[idx]]
         else: 
             turn_pos = choice(turn_arr)
