@@ -84,7 +84,7 @@ class Map:
                       for i in range(len(self.grid))]
         self.SPEED_MULTIPLIER = speed_multiplier
         self.N_CARS = N_CARS
-        self.RIGHT_TURN = True
+        self.RIGHT_TURN = RIGHT_TURN
         self.STATE = STATE
         self.semaphores = self.load_semaphores()
         self.GUI = GUI
