@@ -121,8 +121,8 @@ class Car:
         parts = self.distance(p1,p2)
         points =  list(
             zip(
-                [int(round(i)) for i in np.linspace(p1[0], p2[0], int(parts))],
-                [int(round(j)) for j in np.linspace(p1[1], p2[1], int(parts))]
+                [int(round(i)) for i in np.linspace(p1[0], p2[0], int(parts) + 2)],
+                [int(round(j)) for j in np.linspace(p1[1], p2[1], int(parts) + 2)]
             )
         )
         seen = set()
@@ -156,11 +156,38 @@ class Car:
             elif symbol == '+':
                 self.street = self.next_street
                 self.next_street = self.graph.decide(self.street)
-                turn_pos = self.intersections[self.street]
-                target_i, target_j = choice(turn_pos)
+                
+                target_i, target_j = self.get_car_line(self.street, self.next_street)
 
                 # Make turn
                 await self.turn(target_i,target_j)
 
             else:
                 await self.move_next(self.prev_direction)
+
+    def get_car_line(self, street, next_street):
+        '''
+            This func decides the line the car should drive at next
+        '''
+        mapper = {
+            'E': 'FKAD',
+            'F': 'EHJM',
+            'K': 'LTQO',
+            'L': 'KADF',
+            'M': 'NXUS',
+            'N': 'MEHJ',
+            'S': 'TQOL',
+            'T': 'SNXU'
+        }
+        turn_arr = self.intersections[street]
+
+        if street in mapper:
+            # This piece of code is horrible, why do i keep programming in python
+            idx_mapper = [0,0,1,2]
+            for idx, n_state in enumerate(mapper[street]):
+                if n_state == next_street:
+                    print(n_state, next_street)
+                    turn_pos = turn_arr[idx_mapper[idx]]
+        else: 
+            turn_pos = choice(turn_arr)
+        return turn_pos
