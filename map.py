@@ -72,7 +72,7 @@ def clear():
     system(cls_cmd)
 
 class Map:
-    def __init__(self, path: str, graph: [[str]], speed_multiplier=1.0, cars: dict = {}):
+    def __init__(self, path: str, graph: [[str]], speed_multiplier=1.0, N_CARS = 10, cars: dict = {}, GUI=True):
         self.grid = self.parse_map(path)
         self.intersections = self.load_intersections()
         self.graph = graph
@@ -83,7 +83,9 @@ class Map:
         self.locks = [[asyncio.Lock() for j in range(len(self.grid[0]))]
                       for i in range(len(self.grid))]
         self.SPEED_MULTIPLIER = speed_multiplier
+        self.N_CARS = N_CARS
         self.semaphores = self.load_semaphores()
+        self.GUI = GUI
 
     def load_intersections(self):
         direction_mapper = {
@@ -194,7 +196,6 @@ class Map:
         )
 
     async def spawn_cars(self):
-        cars_per_second = 3
         n_cars = 0
         while True:
             # Get state / spawn point
@@ -216,7 +217,7 @@ class Map:
             self.cars_complete.append(car)
             n_cars += 1
             asyncio.create_task(car.drive())
-            await asyncio.sleep(1 / cars_per_second * self.SPEED_MULTIPLIER)
+            await asyncio.sleep(1 / self.N_CARS * self.SPEED_MULTIPLIER)
 
     async def start_semaphores(self):
         tasks = []
@@ -294,9 +295,10 @@ class Map:
 
         clear()
         # Print values
-        print(
-            self.grid_to_str(grid)
-        )
+        if self.GUI:
+            print(
+                self.grid_to_str(grid)
+            )
         print(f'Average wait time per car: {self.calculate_wait()}')
         #await SCREEN.render(self.grid_to_str(grid))
             

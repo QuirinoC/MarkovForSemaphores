@@ -8,6 +8,7 @@ car_colors = ['🚖', '🚘', '🚍']
 dir_options = ['up', 'down', 'left', 'right']
 street_options = list(range(12))
 
+MAGIC_NUMBER = 5.0067901611328125e-06
 
 class Car:
     def __init__(self,
@@ -66,7 +67,7 @@ class Car:
             ### Benchmark how much a car waits
             start = time()
             await self.locks[i][j].acquire()
-            self.wait_time += time() - start
+            self.wait_time += time() - start - MAGIC_NUMBER
             ### End of benchmark
         # Move the car anyways so the matrix can kill it
         self.i = i
