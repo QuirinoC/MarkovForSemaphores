@@ -116,6 +116,13 @@ class Map:
                 if col in 'ABCDEFGHIJKLMNOPQRSTUVWX':
                     data[col] = data.get(col, []) + [(idx,j)]
                     self.grid[idx][j] = direction_mapper[col]
+        
+        for state, direction in direction_mapper.items():
+            if direction in '>^':
+                data[state] = data[state]
+            elif direction in '<v':
+                data[state] = data[state][::-1]
+
         return data
         # Revert intersections
 
