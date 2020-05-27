@@ -7,10 +7,11 @@ class Screen:
     def __init__(self):
         self.stdscr = curses.initscr()
 
-    async def render(self, data):
+    async def render(self, data, status):
         for idx, row in enumerate(data.split('\n')):
             self.stdscr.addstr(idx,0, str(row))
             self.stdscr.refresh()
+        self.stdscr.addstr(idx,0,status)
 
 async def main():
     s = Screen([1,2,3,4])

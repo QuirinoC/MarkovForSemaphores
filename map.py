@@ -296,5 +296,5 @@ class Map:
         # Print values
         #print(to_print)
         #print(f'Average wait time per car: {self.calculate_wait()}', flush=True)
-        await SCREEN.render(to_print)
+        await SCREEN.render(to_print, f'Average wait time per car: {self.calculate_wait()}')
             
